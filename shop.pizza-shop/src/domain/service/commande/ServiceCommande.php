@@ -2,12 +2,21 @@
 
 namespace pizzashop\shop\domain\service\commande;
 
+use Monolog\Logger;
 use pizzashop\shop\domain\dto\commande\CommandeDTO;
 use pizzashop\shop\domain\entities\commande\Commande;
+use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 
 class ServiceCommande implements iCommander
 {
+
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
 
     public function accederCommande(string $id): CommandeDTO
     {
@@ -30,7 +39,7 @@ class ServiceCommande implements iCommander
             throw new ServiceCommandeInvalidTransitionException("Commande déjà validée");
         }
         $commande->update(['etat' => Commande::ETAT_VALIDE]);
-        //mettre le logger ici $this->logger->info("Commande $idCommande validée");
+        $this->logger->info("Commande $commande->id validée");
         return $commande->toDTO();
     }
 
@@ -49,7 +58,7 @@ class ServiceCommande implements iCommander
             'etat' => Commande::ETAT_CREE
         ]);
         //creer items
-
+        $this->logger->info("Commande $commande->id créée");
         return $commande->toDTO();
     }
 }
