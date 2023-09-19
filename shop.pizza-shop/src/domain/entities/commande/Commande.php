@@ -15,16 +15,27 @@ class Commande extends \Illuminate\Database\Eloquent\Model
     public $keyType = 'string';
     public $incrementing = false;
     public $timestamps = false;
-    protected $fillable = [ 'id', 'date_commande', 'type_livraison', 'mail_client', 'etat'];
+    protected $fillable = ['id', 'date_commande', 'type_livraison', 'mail_client', 'etat'];
 
-    public function toDTO() : CommandeDTO {
+    public function items()
+    {
+        return $this->hasMany(Item::class, 'commande_id', 'id');
+    }
+
+    public function calculerMontantTotal(): void
+    {
+        $this->montant = 0;
+        foreach ($this->items as $item) {
+            $this->montant += $item->tarif * $item->quantite;
+        }
+    }
+
+    public function toDTO(): CommandeDTO
+    {
         return new CommandeDTO(
-            $this->id,
-            $this->date_commande,
-            $this->type_livraison,
             $this->mail_client,
-            $this->montant,
-            $this->delai
+            $this->type_livraison,
+            $this->date_commande,
         );
     }
 

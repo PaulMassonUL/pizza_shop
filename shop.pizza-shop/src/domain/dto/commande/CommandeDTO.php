@@ -11,14 +11,12 @@ class CommandeDTO extends \pizzashop\shop\domain\dto\DTO
     public string $mail_client;
     public float $montant;
     public int $delai;
+    public array $items;
 
-    public function __construct(string $id, string $date, int $type_livraison, string $mail_client, float $montant, int $delai)
+    public function __construct(string $mail_client, int $type_livraison, string $date)
     {
-        $this->id = $id;
-        $this->date = $date;
-        $this->type_livraison = $type_livraison;
         $this->mail_client = $mail_client;
-        $this->montant = $montant;
-        $this->delai = $delai;
+        $this->type_livraison = $type_livraison;
+        $this->date = $date;
     }
 }
