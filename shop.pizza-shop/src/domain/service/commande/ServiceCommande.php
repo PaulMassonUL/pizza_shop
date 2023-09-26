@@ -7,6 +7,8 @@ use pizzashop\shop\domain\entities\commande\Commande;
 use pizzashop\shop\domain\entities\commande\Item;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
+use Respect\Validation\Exceptions\NestedValidationException;
+use Respect\Validation\Validator as v;
 
 class ServiceCommande implements iCommander
 {
@@ -44,9 +46,12 @@ class ServiceCommande implements iCommander
         return $commande->toDTO();
     }
 
+    /**
+     * @throws ServiceCommandeInvalidDataException
+     */
     public function creerCommande(CommandeDTO $c): CommandeDTO
     {
-//        $this->validerDonneesDeCommande($c);
+        $this->validerDonneesDeCommande($c);
 
         $uuid = Uuid::uuid4();
         $commande = Commande::create([
@@ -81,4 +86,24 @@ class ServiceCommande implements iCommander
         $this->logger->info("Commande $commande->id créée");
         return $commande->toDTO();
     }
+
+
+    /**
+     * @throws ServiceCommandeInvalidDataException
+     */
+    public function validerDonneesDeCommande(CommandeDTO $c): void{
+        try {
+            v::email()->assert($c->mail_client);
+            v::in([Commande::TYPE_LIVRAISON_SUR_PLACE, Commande::TYPE_LIVRAISON_DOMICILE, Commande::TYPE_LIVRAISON_A_EMPORTER])->assert($c->type_livraison);
+            v::arrayType()->notEmpty()->assert($c->items);
+            foreach ($c->items as $item) {
+                v::intVal()->positive()->assert($item->numero);
+                v::intVal()->positive()->assert($item->quantite);
+                v::in([Item::TAILLE_NORMALE, Item::TAILLE_GRANDE])->assert($item->taille);
+            }
+        } catch (NestedValidationException $e) {
+            throw new ServiceCommandeInvalidDataException("Données de commande invalides");
+        }
+    }
+
 }

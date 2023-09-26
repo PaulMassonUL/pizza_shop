@@ -6,6 +6,9 @@ use pizzashop\shop\domain\dto\commande\ItemDTO;
 
 class Item extends \Illuminate\Database\Eloquent\Model
 {
+    const TAILLE_NORMALE = 1;
+    const TAILLE_GRANDE = 2;
+
     protected $connection = 'commande';
     protected $table = 'item';
     protected $primaryKey = 'id';

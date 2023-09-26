@@ -9,6 +9,10 @@ class Commande extends \Illuminate\Database\Eloquent\Model
     const ETAT_CREE = 1;
     const ETAT_VALIDE = 2;
 
+    const TYPE_LIVRAISON_SUR_PLACE = 1;
+    const TYPE_LIVRAISON_DOMICILE = 2;
+    const TYPE_LIVRAISON_A_EMPORTER = 3;
+
     protected $connection = 'command';
     protected $table = 'commande';
     protected $primaryKey = 'id';
