@@ -8,7 +8,8 @@ use pizzashop\shop\domain\entities\commande\Commande;
 use pizzashop\shop\domain\entities\commande\Item;
 use Illuminate\Database\Capsule\Manager as DB;
 
-class ServiceCommandeTest extends \PHPUnit\Framework\TestCase {
+class ServiceCommandeTest extends \PHPUnit\Framework\TestCase
+{
 
     private static $commandeIds = [];
     private static $itemIds = [];
@@ -28,7 +29,7 @@ class ServiceCommandeTest extends \PHPUnit\Framework\TestCase {
         $db->bootEloquent();
 
         self::$serviceProduits = new \pizzashop\shop\domain\service\catalogue\ServiceCatalogue();
-        self::$serviceCommande = new \pizzashop\shop\domain\service\commande\ServiceCommande(self::$serviceProduits);
+        self::$serviceCommande = new \pizzashop\shop\domain\service\commande\ServiceCommande(self::$serviceProduits, new \Monolog\Logger('test'));
         self::$faker = Factory::create('fr_FR');
         self::fill();
 
@@ -41,27 +42,51 @@ class ServiceCommandeTest extends \PHPUnit\Framework\TestCase {
     }
 
 
-    private static function cleanDB(){
-        foreach (self::$commandeIds as $id){
+    private static function cleanDB()
+    {
+        foreach (self::$commandeIds as $id) {
             Commande::find($id)->delete();
         }
-        foreach (self::$itemIds as $id){
+        foreach (self::$itemIds as $id) {
             Item::find($id)->delete();
         }
     }
-    private static function fill() {
 
-   	 	// TODO : créer une commande dans la base pour tester l'accès à une commande
+    private static function fill()
+    {
+        $commande = Commande::create([
+            'id' => self::$faker->uuid,
+            'date_commande' => self::$faker->dateTimeBetween('-1 year', 'now')->format('Y-m-d H:i:s'),
+            'type_livraison' => Commande::TYPE_LIVRAISON_DOMICILE,
+            'mail_client' => self::$faker->email,
+            'etat' => Commande::ETAT_CREE
+        ]);
+        self::$commandeIds[] = $commande->id;
+
+        for ($i = 0; $i < self::$faker->numberBetween(1, 5); $i++) {
+            $item = Item::create([
+                'id' => self::$faker->uuid,
+                'numero' => $i + 1,
+                'libelle' => self::$faker->word,
+                'taille' => self::$faker->numberBetween(1, 2),
+                'libelle_taille' => self::$faker->word,
+                'tarif' => self::$faker->randomFloat(2, 5, 20),
+                'quantite' => self::$faker->numberBetween(1, 5),
+                'commande_id' => $commande->id
+            ]);
+            self::$itemIds[] = $item->id;
+        }
     }
 
 
-    public function testAccederCommande(){
+    public function testAccederCommande()
+    {
         //$id = self::$commandeIds[0];
-        foreach (self::$commandeIds as $id){
+        foreach (self::$commandeIds as $id) {
             $commandeEntity = Commande::find($id);
             $commandeDTO = self::$serviceCommande->accederCommande($id);
             $this->assertNotNull($commandeDTO);
- 
+
             // TODO : comparer les données de l'entité et du DTO
         }
 

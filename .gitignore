@@ -2,6 +2,7 @@
 # used to write all messages from simulation:  -l <filename>
 *.log
 **/cache/
+**.cache
 
 ##### VisualStudioCode
 .vscode/

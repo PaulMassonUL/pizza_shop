@@ -13,7 +13,7 @@ class Commande extends \Illuminate\Database\Eloquent\Model
     const TYPE_LIVRAISON_DOMICILE = 2;
     const TYPE_LIVRAISON_A_EMPORTER = 3;
 
-    protected $connection = 'command';
+    protected $connection = 'commande';
     protected $table = 'commande';
     protected $primaryKey = 'id';
     public $keyType = 'string';
