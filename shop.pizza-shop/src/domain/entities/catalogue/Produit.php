@@ -11,7 +11,7 @@ class Produit extends \Illuminate\database\eloquent\Model
     protected $table = 'produit';
     protected $primaryKey = 'id';
     public $timestamps = false;
-    protected $fillable = ['numero', 'libelle', 'description','image'];
+    protected $fillable = ['numero', 'libelle', 'description', 'image'];
 
     public function categorie(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
@@ -23,8 +23,5 @@ class Produit extends \Illuminate\database\eloquent\Model
         return $this->belongsToMany(Taille::class, 'tarif', 'produit_id', 'taille_id')
             ->withPivot('tarif');
     }
-
-
-
 
 }

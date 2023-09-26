@@ -5,6 +5,8 @@ namespace pizzashop\shop\domain\service\commande;
 use pizzashop\shop\domain\dto\commande\CommandeDTO;
 use pizzashop\shop\domain\entities\commande\Commande;
 use pizzashop\shop\domain\entities\commande\Item;
+use pizzashop\shop\domain\service\catalogue\iInfoCatalogue;
+use pizzashop\shop\domain\service\catalogue\ServiceCatalogueNotFoundException;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Respect\Validation\Exceptions\NestedValidationException;
@@ -75,7 +77,7 @@ class ServiceCommande implements iCommander
             $item->taille = $itemDTO->taille;
             $item->quantite = $itemDTO->quantite;
 
-            $item->libelle = $infoItem->libelle;
+            $item->libelle = $infoItem->libelle_produit;
             $item->libelle_taille = $infoItem->libelle_taille;
             $item->tarif = $infoItem->tarif;
             $commande->items()->save($item);
@@ -91,7 +93,8 @@ class ServiceCommande implements iCommander
     /**
      * @throws ServiceCommandeInvalidDataException
      */
-    public function validerDonneesDeCommande(CommandeDTO $c): void{
+    public function validerDonneesDeCommande(CommandeDTO $c): void
+    {
         try {
             v::email()->assert($c->mail_client);
             v::in([Commande::TYPE_LIVRAISON_SUR_PLACE, Commande::TYPE_LIVRAISON_DOMICILE, Commande::TYPE_LIVRAISON_A_EMPORTER])->assert($c->type_livraison);
@@ -101,7 +104,7 @@ class ServiceCommande implements iCommander
                 v::intVal()->positive()->assert($item->quantite);
                 v::in([Item::TAILLE_NORMALE, Item::TAILLE_GRANDE])->assert($item->taille);
             }
-        } catch (NestedValidationException $e) {
+        } catch (NestedValidationException) {
             throw new ServiceCommandeInvalidDataException("Données de commande invalides");
         }
     }
