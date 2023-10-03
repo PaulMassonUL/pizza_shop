@@ -58,7 +58,7 @@ class ServiceCommande implements iCommander
         $uuid = Uuid::uuid4();
         $commande = Commande::create([
             'id' => $uuid->toString(),
-            'date' => date('Y-m-d H:i:s'),
+            'date_commande' => date('Y-m-d H:i:s'),
             'type_livraison' => $c->type_livraison,
             'mail_client' => $c->mail_client,
             'montant' => $c->montant,
