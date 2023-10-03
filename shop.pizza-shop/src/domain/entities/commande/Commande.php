@@ -19,7 +19,7 @@ class Commande extends \Illuminate\Database\Eloquent\Model
     public $keyType = 'string';
     public $incrementing = false;
     public $timestamps = false;
-    protected $fillable = ['id', 'date_commande', 'type_livraison', 'mail_client', 'etat'];
+    protected $fillable = ['id', 'date_commande', 'type_livraison', 'mail_client', 'etat', 'delai'];
 
     public function items()
     {
@@ -28,18 +28,23 @@ class Commande extends \Illuminate\Database\Eloquent\Model
 
     public function calculerMontantTotal(): void
     {
-        $this->montant = 0;
+        $this->montant_total = 0;
         foreach ($this->items as $item) {
-            $this->montant += $item->tarif * $item->quantite;
+            $this->montant_total += $item->tarif * $item->quantite;
         }
     }
 
     public function toDTO(): CommandeDTO
     {
         return new CommandeDTO(
+            $this->id,
             $this->mail_client,
             $this->type_livraison,
             $this->date_commande,
+            $this->montant_total,
+            $this->etat,
+            $this->delai,
+            $this->items->map(fn($item) => $item->toDTO())->toArray()
         );
     }
 
