@@ -23,6 +23,9 @@ class ServiceCommande implements iCommander
         $this->logger = $logger;
     }
 
+    /**
+     * @throws ServiceCommandeNotFoundException
+     */
     public function accederCommande(string $id): CommandeDTO
     {
         try {
@@ -33,6 +36,10 @@ class ServiceCommande implements iCommander
         return $commande->toDTO();
     }
 
+    /**
+     * @throws ServiceCommandeNotFoundException
+     * @throws ServiceCommandeInvalidTransitionException
+     */
     public function validerCommande(string $id): CommandeDTO
     {
         try {

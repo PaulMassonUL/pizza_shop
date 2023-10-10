@@ -18,7 +18,7 @@ class AccederCommandeAction extends Action
         if(is_null($args['id_commande'])) throw new HttpBadRequestException($rq, 'id_commande manquant');
         try {
             $serviceProduits = new \pizzashop\shop\domain\service\catalogue\ServiceCatalogue();
-            $logger = new Logger('app.errors');
+            $logger = new Logger('api.actions.access_command');
             $logger->pushHandler(new StreamHandler('../log/log.log'));
             $commandeService = new ServiceCommande($serviceProduits, $logger);
 

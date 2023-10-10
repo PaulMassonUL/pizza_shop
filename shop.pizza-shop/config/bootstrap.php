@@ -2,7 +2,10 @@
 
 $app = \Slim\Factory\AppFactory::create();
 $app->addRoutingMiddleware();
-$app->addErrorMiddleware(true, false, false);
+$errorMiddleware = $app->addErrorMiddleware(true, false, false);
+
+$errorHandler = $errorMiddleware->getDefaultErrorHandler();
+$errorHandler->forceContentType('application/json');
 
 $capsule = new \Illuminate\Database\Capsule\Manager();
 
