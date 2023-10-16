@@ -95,20 +95,15 @@ class ServiceCommandeTest extends \PHPUnit\Framework\TestCase
             $this->assertNotNull($commandeDTO);
 
             // TODO : comparer les données de l'entité et du DTO
-            $this->assertEquals($commandeEntity->id, $commandeDTO->id);
+            $this->assertEquals($commandeEntity->mail_client, $commandeDTO->mail_client);
         }
     }
 
     public function testCreerCommand()
     {
         $commandeDTO = self::$serviceCommande->creerCommande(new \pizzashop\shop\domain\dto\commande\CommandeDTO(
-            self::$faker->uuid,
             self::$faker->email,
             Commande::TYPE_LIVRAISON_DOMICILE,
-            self::$faker->dateTimeBetween('-1 year', 'now')->format('Y-m-d H:i:s'),
-            self::$faker->randomFloat(2, 5, 20),
-            Commande::ETAT_CREE,
-            0,
             array(
                 new ItemDTO(
                     self::$faker->numberBetween(1, 5),
@@ -118,8 +113,9 @@ class ServiceCommandeTest extends \PHPUnit\Framework\TestCase
             )
         ));
         $this->assertNotNull($commandeDTO);
-        $this->assertNotNull(Commande::find($commandeDTO->id));
-        self::$commandeIds[] = $commandeDTO->id;
+        $c = Commande::where('mail_client', $commandeDTO->mail_client)->first();
+        $this->assertNotNull($c);
+        self::$commandeIds[] = $c->id;
     }
 
     public function testValiderCommande()
@@ -127,7 +123,8 @@ class ServiceCommandeTest extends \PHPUnit\Framework\TestCase
         $id = self::$commandeIds[0];
         $commandeDTO = self::$serviceCommande->validerCommande($id);
         $this->assertNotNull($commandeDTO);
-        $this->assertEquals(Commande::ETAT_VALIDE, $commandeDTO->etat);
+        $c = Commande::find($id);
+        $this->assertEquals(Commande::ETAT_VALIDE, $c->etat);
     }
 
 }

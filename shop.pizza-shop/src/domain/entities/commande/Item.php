@@ -20,14 +20,15 @@ class Item extends \Illuminate\Database\Eloquent\Model
     }
 
     public function toDTO() : ItemDTO {
-        $itemDTO = new ItemDTO(
+        $i = new ItemDTO(
             $this->numero,
             $this->taille,
             $this->quantite
         );
-        $itemDTO->setLibelle($this->libelle);
-        $itemDTO->setTarif($this->tarif);
-        $itemDTO->setLibelleTaille($this->libelle_taille);
-        return $itemDTO;
+        $i->id = $this->id;
+        $i->libelle = $this->libelle;
+        $i->libelle_taille = $this->libelle_taille;
+        $i->tarif = $this->tarif;
+        return $i;
     }
 }
