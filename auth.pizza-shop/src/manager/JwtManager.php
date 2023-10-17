@@ -2,35 +2,53 @@
 
 namespace pizzashop\auth\api\manager;
 
+use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
 class JwtManager
 {
-    public string $secret;
-    public string $alg;
+    private string $secret;
+    private string $alg;
+    private int $expirationTime;
 
-    public function __construct()
+    private string $issuer;
+
+    public function __construct(string $secret, int $expirationTime)
     {
-        $this->secret = getenv('JWT_SECRET');
-        $this->alg = 'HS512';
+        $this->secret = $secret;
+        $this->expirationTime = $expirationTime;
+        $this->alg = "HS256";
+    }
+
+    public function setIssuer(string $issuer): void
+    {
+        $this->issuer = $issuer;
     }
 
     public function create(array $payload): string
     {
-        $header = ['alg' => $this->alg,
-            'typ' => 'JWT'
-        ];
-
-        return JWT::encode($payload, $this->secret, $this->alg);
+        return JWT::encode([
+            "iss" => $this->issuer,
+            "iat" => time(),
+            "exp" => time() + $this->expirationTime,
+            "upr" => $payload
+        ], $this->secret, $this->alg);
     }
 
-    public function validate(string $t): void
+    /**
+     * @throws JwtManagerExpiredTokenException
+     * @throws JwtManagerInvalidTokenException
+     */
+    public function validate(string $t): array
     {
         try {
-            JWT::decode($t, new Key($this->secret, $this->alg));
+            $jwt = JWT::decode($t, new Key($this->secret, $this->alg));
+        } catch (ExpiredException) {
+            throw new JwtManagerExpiredTokenException("Expired token");
         } catch (\Exception) {
-            throw new \Exception("Invalid token");
+            throw new JwtManagerInvalidTokenException("Invalid token");
         }
+        return (array)$jwt->upr;
     }
 }

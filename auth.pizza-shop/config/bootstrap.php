@@ -1,7 +1,17 @@
 <?php
 
-$app = \Slim\Factory\AppFactory::create();
+$builder = new \DI\ContainerBuilder();
+
+$builder->addDefinitions(__DIR__ . '/service_dependencies.php');
+$builder->addDefinitions(__DIR__ . '/settings.php');
+
+$c = $builder->build();
+
+$app = \Slim\Factory\AppFactory::createFromContainer($c);
+
 $app->addRoutingMiddleware();
+$app->addBodyParsingMiddleware();
+
 $errorMiddleware = $app->addErrorMiddleware(true, false, false);
 
 $errorHandler = $errorMiddleware->getDefaultErrorHandler();

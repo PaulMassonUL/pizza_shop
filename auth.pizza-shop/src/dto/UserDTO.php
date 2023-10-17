@@ -5,7 +5,8 @@ namespace pizzashop\auth\api\dto;
 class UserDTO extends DTO
 {
 
-    public CredentialsDTO $credentials;
+    public string $email;
+    public string $password;
     public int $active;
     public string $activation_token;
     public string $activation_token_expiration_date;
@@ -15,9 +16,11 @@ class UserDTO extends DTO
     public string $reset_passwd_token_expiration_date;
     public string $username;
 
-    public function __construct(CredentialsDTO $credentials)
+    public function __construct(string $username, string $email)
     {
-        $this->credentials = $credentials;
+        $this->username = $username;
+        $this->email = $email;
     }
+
 
 }
