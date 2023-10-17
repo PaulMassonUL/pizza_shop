@@ -19,6 +19,6 @@ interface iAuth
 
     public function activate_signup(TokenDTO $t) : void;
 
-    public function reset_password(TokenDTO $t, CredentialsDTO $c) : void;
+    public function reset_password(TokenDTO $t, CredentialsDTO $c, string $newPassword) : void;
 
 }
