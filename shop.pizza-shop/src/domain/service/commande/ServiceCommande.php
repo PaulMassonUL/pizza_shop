@@ -2,6 +2,7 @@
 
 namespace pizzashop\shop\domain\service\commande;
 
+use Exception;
 use pizzashop\shop\domain\dto\commande\CommandeDTO;
 use pizzashop\shop\domain\entities\commande\Commande;
 use pizzashop\shop\domain\entities\commande\Item;
@@ -30,7 +31,7 @@ class ServiceCommande implements iCommander
     {
         try {
             $commande = Commande::findOrFail($id);
-        } catch (\Exception) {
+        } catch (Exception) {
             throw new ServiceCommandeNotFoundException("Commande $id non trouvée");
         }
         return $commande->toDTO();
@@ -44,11 +45,16 @@ class ServiceCommande implements iCommander
     {
         try {
             $commande = Commande::findOrFail($id);
-        } catch (\Exception) {
+        } catch (Exception) {
             throw new ServiceCommandeNotFoundException("Commande $id non trouvée");
         }
         if ($commande->etat >= Commande::ETAT_VALIDE) {
-            throw new ServiceCommandeInvalidTransitionException("Commande $id déjà validée");
+            $etat = match($commande->etat) {
+                Commande::ETAT_VALIDE => Commande::ETAT_VALIDE_LIBELLE,
+                Commande::ETAT_PAYEE => Commande::ETAT_PAYEE_LIBELLE,
+                default => '',
+            };
+            throw new ServiceCommandeInvalidTransitionException($etat);
         }
         $commande->update(['etat' => Commande::ETAT_VALIDE]);
         $this->logger->info("Commande $id validée");
@@ -68,7 +74,6 @@ class ServiceCommande implements iCommander
             'date_commande' => date('Y-m-d H:i:s'),
             'type_livraison' => $c->type_livraison,
             'mail_client' => $c->mail_client,
-            'montant' => $c->montant,
             'delai' => 0,
             'etat' => Commande::ETAT_CREE
         ]);
@@ -103,15 +108,16 @@ class ServiceCommande implements iCommander
     public function validerDonneesDeCommande(CommandeDTO $c): void
     {
         try {
-            v::email()->assert($c->mail_client);
-            v::in([Commande::TYPE_LIVRAISON_SUR_PLACE, Commande::TYPE_LIVRAISON_DOMICILE, Commande::TYPE_LIVRAISON_A_EMPORTER])->assert($c->type_livraison);
-            v::arrayType()->notEmpty()->assert($c->items);
-            foreach ($c->items as $item) {
-                v::intVal()->positive()->assert($item->numero);
-                v::intVal()->positive()->assert($item->quantite);
-                v::in([Item::TAILLE_NORMALE, Item::TAILLE_GRANDE])->assert($item->taille);
-            }
-        } catch (NestedValidationException) {
+            v::attribute('mail_client', v::email())
+                ->attribute('type_livraison', v::in([Commande::TYPE_LIVRAISON_SUR_PLACE, Commande::TYPE_LIVRAISON_DOMICILE, Commande::TYPE_LIVRAISON_A_EMPORTER]))
+                ->attribute('items', v::arrayVal()->notEmpty()
+                    ->each(v::attribute('numero', v::intVal()->positive())
+                        ->attribute('taille', v::in([1,2]))
+                        ->attribute('quantite', v::intVal()->positive())
+                ))
+                ->assert($c);
+
+        } catch (NestedValidationException $e) {
             throw new ServiceCommandeInvalidDataException("Données de commande invalides");
         }
     }

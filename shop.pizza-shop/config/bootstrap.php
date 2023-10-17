@@ -1,11 +1,25 @@
 <?php
 
-$app = \Slim\Factory\AppFactory::create();
+use DI\ContainerBuilder;
+
+$builder = new ContainerBuilder();
+
+$builder->addDefinitions(__DIR__ . '/settings.php');
+$builder->addDefinitions(__DIR__ . '/services_dependencies.php');
+$builder->addDefinitions(__DIR__ . '/actions_dependencies.php');
+
+$c=$builder->build();
+
+$app = \Slim\Factory\AppFactory::createFromContainer($c);
+
+
 $app->addRoutingMiddleware();
+$app->addBodyParsingMiddleware();
 $errorMiddleware = $app->addErrorMiddleware(true, false, false);
 
 $errorHandler = $errorMiddleware->getDefaultErrorHandler();
 $errorHandler->forceContentType('application/json');
+
 
 $capsule = new \Illuminate\Database\Capsule\Manager();
 

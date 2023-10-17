@@ -2,12 +2,18 @@
 
 namespace pizzashop\shop\domain\entities\commande;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use pizzashop\shop\domain\dto\commande\CommandeDTO;
 
-class Commande extends \Illuminate\Database\Eloquent\Model
+class Commande extends Model
 {
     const ETAT_CREE = 1;
+    const ETAT_CREE_LIBELLE = 'cree';
     const ETAT_VALIDE = 2;
+    const ETAT_VALIDE_LIBELLE = 'validee';
+    const ETAT_PAYEE = 3;
+    const ETAT_PAYEE_LIBELLE = 'payee';
 
     const TYPE_LIVRAISON_SUR_PLACE = 1;
     const TYPE_LIVRAISON_DOMICILE = 2;
@@ -21,7 +27,7 @@ class Commande extends \Illuminate\Database\Eloquent\Model
     public $timestamps = false;
     protected $fillable = ['id', 'date_commande', 'type_livraison', 'mail_client', 'etat', 'delai'];
 
-    public function items()
+    public function items(): HasMany
     {
         return $this->hasMany(Item::class, 'commande_id', 'id');
     }
@@ -32,20 +38,29 @@ class Commande extends \Illuminate\Database\Eloquent\Model
         foreach ($this->items as $item) {
             $this->montant_total += $item->tarif * $item->quantite;
         }
+        $this->save();
     }
 
     public function toDTO(): CommandeDTO
     {
-        return new CommandeDTO(
-            $this->id,
+        $c = new CommandeDTO(
             $this->mail_client,
             $this->type_livraison,
-            $this->date_commande,
-            $this->montant_total,
-            $this->etat,
-            $this->delai,
-            $this->items->map(fn($item) => $item->toDTO())->toArray()
+            $this->items->toArray()
         );
+        $c->id = $this->id;
+        $c->date_commande = $this->date_commande;
+        $c->montant_total = $this->montant_total;
+        $c->etat = $this->etat;
+        $c->delai = $this->delai;
+
+
+        $c->items = [];
+        foreach ($this->items()->get() as $item) {
+            $c->items[] = $item->toDTO();
+        }
+
+        return $c;
     }
 
 }
