@@ -28,7 +28,7 @@ class JwtManager
     public function validate(string $t): void
     {
         try {
-            $decoded = JWT::decode($t, new Key($this->secret, $this->alg));
+            JWT::decode($t, new Key($this->secret, $this->alg));
         } catch (\Exception) {
             throw new \Exception("Invalid token");
         }
