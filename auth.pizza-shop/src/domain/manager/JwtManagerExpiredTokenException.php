@@ -1,6 +1,6 @@
 <?php
 
-namespace pizzashop\auth\api\manager;
+namespace pizzashop\auth\domain\manager;
 
 class JwtManagerExpiredTokenException extends \Exception
 {

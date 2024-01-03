@@ -1,6 +1,6 @@
 <?php
 
-namespace pizzashop\auth\api\manager;
+namespace pizzashop\auth\domain\manager;
 
 class JwtManagerInvalidTokenException extends \Exception
 {

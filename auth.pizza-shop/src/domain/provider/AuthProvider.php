@@ -1,12 +1,11 @@
 <?php
 
-namespace pizzashop\auth\api\provider;
+namespace pizzashop\auth\domain\provider;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use pizzashop\auth\api\dto\UserDTO;
-use pizzashop\auth\api\entities\User;
+use pizzashop\auth\domain\entities\User;
 
-class AuthProvider
+class AuthProvider implements iAuthProvider
 {
 
     private User $authenticatedUser;
@@ -14,14 +13,14 @@ class AuthProvider
     /**
      * @throws AuthProviderInvalidCredentialsException
      */
-    public function checkCredentials(string $user, string $pass): void
+    public function checkCredentials(string $email, string $pass): void
     {
         try {
-            $user = User::where('email', $user)->firstOrFail();
+            $user = User::findOrFail($email);
             if (!password_verify($pass, $user->password)) throw new \Exception("Invalid password");
             $this->authenticatedUser = $user;
             $this->generateRefreshToken($user);
-        } catch (\Exception) {
+        } catch (ModelNotFoundException) {
             throw new AuthProviderInvalidCredentialsException("Invalid credentials");
         }
     }
@@ -37,26 +36,28 @@ class AuthProvider
         $this->authenticatedUser = $user;
     }
 
-    public function generateRefreshToken(User $user): void{
+    public function generateRefreshToken(User $user): void
+    {
         $user->refresh_token = bin2hex(random_bytes(32));
-        $user->refresh_token_expiration_date = date('Y-m-d H:i:s', time() + 3600 * 24);
+        $user->refresh_token_expiration_date = date('Y-m-d H:i:s', time() + 3600);
         $user->save();
     }
 
     /**
      * @throws AuthProviderInvalidCredentialsException
      */
-    public function register(string $user, string $pass): void
+    public function register(string $email, string $pass, string $username): void
     {
-        try {
-            User::where('email', $user)->firstOrFail();
-            throw new AuthProviderInvalidCredentialsException("User already exists");
-        } catch (ModelNotFoundException) {
-            $user = new User();
-            $user->email = $user;
-            $user->password = password_hash($pass, PASSWORD_DEFAULT, ['cost' => 12]);
-            $user->save();
-        }
+        $user = User::find($email);
+        if (!is_null($user)) throw new AuthProviderInvalidCredentialsException("User already exists");
+
+        $user = new User();
+        $user->email = $email;
+        $user->password = password_hash($pass, PASSWORD_DEFAULT, ['cost' => 12]);
+        $user->username = $username;
+        $user->save();
+
+        $this->authenticatedUser = $user;
     }
 
     public function activate(string $token): void

@@ -1,6 +1,6 @@
 <?php
 
-namespace pizzashop\auth\api\service;
+namespace pizzashop\auth\domain\service;
 
 class AuthServiceCredentialsException extends \Exception
 {

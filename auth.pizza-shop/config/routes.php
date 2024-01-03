@@ -1,9 +1,12 @@
 <?php
 declare(strict_types=1);
 
-return function( \Slim\App $app):void {
+use pizzashop\auth\app\actions\SigninAction;
 
-//    $app->get('/commandes/{id_commande}[/]', \pizzashop\shop\app\actions\ValiderCommandeAction::class)
-//        ->setName('commande');
+return function (\Slim\App $app): void {
+
+    $app->post('/api/users/signin[/]', SigninAction::class)->setName('signin');
+
+    $app->get('/api/users/validate[/]', \pizzashop\auth\app\actions\ValidateTokenAction::class)->setName('validate');
 
 };

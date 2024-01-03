@@ -1,17 +1,17 @@
 <?php
 
-namespace pizzashop\auth\api\service;
+namespace pizzashop\auth\domain\service;
 
 use Exception;
-use pizzashop\auth\api\dto\CredentialsDTO;
-use pizzashop\auth\api\dto\TokenDTO;
-use pizzashop\auth\api\dto\UserDTO;
-use pizzashop\auth\api\manager\iJwtManager;
-use pizzashop\auth\api\manager\JwtManagerExpiredTokenException;
-use pizzashop\auth\api\manager\JwtManagerInvalidTokenException;
-use pizzashop\auth\api\provider\AuthProviderInvalidCredentialsException;
-use pizzashop\auth\api\provider\AuthProviderInvalidTokenException;
-use pizzashop\auth\api\provider\iAuthProvider;
+use pizzashop\auth\domain\dto\CredentialsDTO;
+use pizzashop\auth\domain\dto\TokenDTO;
+use pizzashop\auth\domain\dto\UserDTO;
+use pizzashop\auth\domain\manager\iJwtManager;
+use pizzashop\auth\domain\manager\JwtManagerExpiredTokenException;
+use pizzashop\auth\domain\manager\JwtManagerInvalidTokenException;
+use pizzashop\auth\domain\provider\AuthProviderInvalidCredentialsException;
+use pizzashop\auth\domain\provider\AuthProviderInvalidTokenException;
+use pizzashop\auth\domain\provider\iAuthProvider;
 use Psr\Log\LoggerInterface;
 
 class AuthService implements iAuth
@@ -34,13 +34,13 @@ class AuthService implements iAuth
     public function signup(CredentialsDTO $c): UserDTO
     {
         try {
-            $this->authProvider->register($c->email, $c->password);
-        } catch (AuthProviderInvalidCredentialsException) {
-            throw new AuthServiceCredentialsException("Invalid credentials");
+            $this->authProvider->register($c->email, $c->password, $c->username);
+        } catch (AuthProviderInvalidCredentialsException $e) {
+            throw new AuthServiceCredentialsException($e->getMessage());
         }
         $user = $this->authProvider->getAuthenticatedUser();
 
-        return new UserDTO($user['user'], $user['email']);
+        return new UserDTO($user['email']);
     }
 
     /**
@@ -51,7 +51,7 @@ class AuthService implements iAuth
         try {
             $this->authProvider->checkCredentials($c->email, $c->password);
         } catch (AuthProviderInvalidCredentialsException) {
-            throw new AuthServiceCredentialsException("Invalid credentials");
+            throw new AuthServiceCredentialsException("Invalid credentials: " . $c->email . " " . $c->password);
         }
         $user = $this->authProvider->getAuthenticatedUser();
 
@@ -72,7 +72,7 @@ class AuthService implements iAuth
             $this->logger->warning('failed jwt validation');
             throw new AuthServiceInvalidTokenException("Invalid token");
         }
-        return new UserDTO($payload['user'], $payload['email']);
+        return new UserDTO($payload['email']);
     }
 
     /**
@@ -83,10 +83,11 @@ class AuthService implements iAuth
         try {
             $this->authProvider->checkToken($t->refresh_token);
         } catch (AuthProviderInvalidTokenException $e) {
-            $this->logger->warning('failed jwt refresh');
-            throw new AuthServiceInvalidTokenException("Invalid token" . $e->getMessage());
+            $this->logger->warning('Failed jwt refresh because of invalid refresh token');
+            throw new AuthServiceInvalidTokenException($e->getMessage());
         }
         $user = $this->authProvider->getAuthenticatedUser();
+
         return new TokenDTO($this->jwtManager->create($user), $user['refresh_token']);
     }
 

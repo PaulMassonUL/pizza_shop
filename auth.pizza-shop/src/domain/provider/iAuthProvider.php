@@ -1,15 +1,15 @@
 <?php
 
-namespace pizzashop\auth\api\provider;
+namespace pizzashop\auth\domain\provider;
 
 interface iAuthProvider
 {
 
-    public function checkCredentials(string $user, string $pass): void;
+    public function checkCredentials(string $email, string $pass): void;
 
     public function checkToken(string $token): void;
 
-    public function register(string $user, string $pass): void;
+    public function register(string $email, string $pass, string $username): void;
 
     public function activate(string $token): void;
 

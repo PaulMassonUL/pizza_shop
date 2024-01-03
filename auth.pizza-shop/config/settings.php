@@ -2,8 +2,11 @@
 
 return [
 
-    'log.commande.name' => 'commande',
-    'log.commande.file' => __DIR__ . '/../logs/commande.log',
-    'log.commande.level' => \Psr\Log\LogLevel::INFO
+    'auth.log.name' => 'auth',
+    'auth.log.file' => __DIR__ . '/../logs/auth.log',
+    'auth.log.level' => \Psr\Log\LogLevel::ALERT,
 
+    'auth.token.secret' => getenv('AUTH_SECRET'),
+    'auth.token.expiration' => 3600,
+    'auth.token.issuer' => $_SERVER['HTTP_HOST'],
 ];

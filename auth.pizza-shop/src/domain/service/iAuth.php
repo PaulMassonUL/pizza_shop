@@ -1,10 +1,10 @@
 <?php
 
-namespace pizzashop\auth\api\service;
+namespace pizzashop\auth\domain\service;
 
-use pizzashop\auth\api\dto\CredentialsDTO;
-use pizzashop\auth\api\dto\TokenDTO;
-use pizzashop\auth\api\dto\UserDTO;
+use pizzashop\auth\domain\dto\CredentialsDTO;
+use pizzashop\auth\domain\dto\TokenDTO;
+use pizzashop\auth\domain\dto\UserDTO;
 
 interface iAuth
 {

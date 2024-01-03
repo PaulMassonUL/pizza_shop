@@ -2,23 +2,24 @@
 
 return [
 
-    'commande.logger' => function (\Psr\Container\ContainerInterface $c) {
-        $log = new \Monolog\Logger($c->get('log.commande.name'));
-        $log->pushHandler(new \Monolog\Handler\StreamHandler($c->get('log.commande.file'), $c->get('log.commande.level')));
+    'logger' => function(\Psr\Container\ContainerInterface $c) {
+        $log = new \Monolog\Logger($c->get('auth.log.name'));
+        $log->pushHandler(new \Monolog\Handler\StreamHandler($c->get('auth.log.file'), $c->get('auth.log.level')));
         return $log;
     },
 
-    'jwt.manager' => function (\Psr\Container\ContainerInterface $c) {
-        return new \pizzashop\auth\api\manager\JwtManager();
+    'JwtManager' => function(\Psr\Container\ContainerInterface $c) {
+        $manager = new \pizzashop\auth\domain\manager\JwtManager($c->get('auth.token.secret'), $c->get('auth.token.expiration'));
+        $manager->setIssuer($c->get('auth.token.issuer'));
+        return $manager;
     },
 
-    'auth.provider' => function (\Psr\Container\ContainerInterface $c) {
-        return new \pizzashop\auth\api\provider\AuthProvider();
+    'AuthProvider' => function(\Psr\Container\ContainerInterface $c) {
+        return new \pizzashop\auth\domain\provider\AuthProvider();
     },
 
-    'auth.service' => function (\Psr\Container\ContainerInterface $c) {
-        return new \pizzashop\auth\api\service\AuthService($c->get('jwt.manager'), $c->get('auth.provider'), $c->get('auth.logger'));
+    'AuthService' => function(\Psr\Container\ContainerInterface $c) {
+        return new \pizzashop\auth\domain\service\AuthService($c->get('JwtManager'), $c->get('AuthProvider'), $c->get('logger'));
     },
-
 
 ];

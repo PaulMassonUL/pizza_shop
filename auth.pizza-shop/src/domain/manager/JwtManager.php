@@ -1,12 +1,12 @@
 <?php
 
-namespace pizzashop\auth\api\manager;
+namespace pizzashop\auth\domain\manager;
 
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-class JwtManager
+class JwtManager implements iJwtManager
 {
     private string $secret;
     private string $alg;
