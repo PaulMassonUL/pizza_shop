@@ -17,7 +17,7 @@ class AuthProvider implements iAuthProvider
     {
         try {
             $user = User::findOrFail($email);
-            if (!password_verify($pass, $user->password)) throw new \Exception("Invalid password");
+            if (!password_verify($pass, $user->password)) throw new AuthProviderInvalidCredentialsException("Invalid credentials");
             $this->authenticatedUser = $user;
             $this->generateRefreshToken($user);
         } catch (ModelNotFoundException) {

@@ -3,7 +3,10 @@
 namespace pizzashop\auth\app\actions;
 
 use pizzashop\auth\domain\dto\CredentialsDTO;
+use pizzashop\auth\domain\dto\TokenDTO;
 use pizzashop\auth\domain\service\AuthServiceCredentialsException;
+use pizzashop\auth\domain\service\AuthServiceExpiredTokenException;
+use pizzashop\auth\domain\service\AuthServiceInvalidTokenException;
 use pizzashop\auth\domain\service\iAuth;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -23,17 +26,16 @@ class ValidateAction extends Action
         if (!$rq->hasHeader('Authorization')) return $rs->withStatus(400);
 
         try {
-            $credentials = $rq->getHeader('Authorization')[0];
-            $credentials = str_replace('Basic ', '', $credentials);
-            $credentials = base64_decode($credentials);
-            $credentials = explode(':', $credentials);
+            $token = $rq->getHeader('Authorization')[0];
+            $token = str_replace('Bearer ', '', $token);
 
-            $tokenDTO = $this->serviceAuth->signin(new CredentialsDTO($credentials[0], $credentials[1]));
+            $userDTO = $this->serviceAuth->validate(new TokenDTO($token));
 
-            $rs->getBody()->write($tokenDTO->toJson());
+            $rs->getBody()->write($userDTO->toJson());
 
             return $rs->withStatus(201);
-        } catch (AuthServiceCredentialsException) {
+        } catch (AuthServiceExpiredTokenException | AuthServiceInvalidTokenException $e) {
+            $rs->getBody()->write(json_encode(['error' => $e->getMessage()]));
             return $rs->withStatus(401);
         }
     }
