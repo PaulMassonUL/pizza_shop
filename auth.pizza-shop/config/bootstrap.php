@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Capsule\Manager;
-use pizzashop\auth\domain\middleware\Cors;
+use pizzashop\shop\domain\middleware\Cors;
 
 $builder = new \DI\ContainerBuilder();
 
