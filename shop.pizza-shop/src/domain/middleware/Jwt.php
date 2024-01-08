@@ -3,19 +3,18 @@
 namespace pizzashop\shop\domain\middleware;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
-use pizzashop\auth\domain\service\iAuth;
+use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Exception\HttpUnauthorizedException;
 
 class Jwt
 {
-    private iAuth $authService;
+    private string $auth_uri;
 
-    public function __construct(iAuth $authService)
+    public function __construct(string $auth_uri)
     {
-        $this->authService = $authService;
+        $this->auth_uri = $auth_uri;
     }
 
     public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $next)
@@ -25,39 +24,65 @@ class Jwt
             throw new HttpUnauthorizedException($request, 'No authorization token provided');
 
         $client = new Client([
-            'base_uri' => $this->settings['auth.service'],
-            'timeout' => 5.0
+            'base_uri' => $this->auth_uri,
+            'timeout' => 30.0
         ]);
 
+        $headers = [
+            'Origin' => $_SERVER['HTTP_HOST'],
+            'Authorization' => $request->getHeader('Authorization'),
+        ];
+
         try {
-            $response = $client->request('GET', '/api/users/validate', [
-                'headers' => ['Authorization' => $request->getHeader('Authorization')]
+            $client->request('GET', '/api/users/validate', [
+                'headers' => $headers
             ]);
 
-            if ($response->getStatusCode() === 200) {
-                return $next->handle($request);
-            } else if ($response->getStatusCode() === 401) {
-                if ($response->hasHeader('Location')) {
-                    // Le serveur répond avec un code 401 et une url de redirection vers l'authentification
+            return $next->handle($request);
+        } catch (RequestException $e) {
+            $response = $e->getResponse();
+            $response_json = json_decode($response->getBody()->getContents(), true);
 
-                    $response = $client->request('POST', '/api/users/signin', [
-                        'headers' => ['Authorization' => $request->getHeader('Authorization')]
-                    ]);
+            if ($response_json['error'] === 'Invalid') {
+                // Le serveur répond avec une erreur Invalid et une url de redirection vers l'authentification
 
+                if (!$response->hasHeader('Location'))
+                    throw new HttpUnauthorizedException($request, 'No redirection url provided');
 
-                } else {
-                    // Lorsque l'access token n'est plus valide, le client utilise le refresh token pour obtenir un nouvel access token
+                // Redirection
+                var_dump($request->withHeader('Location', $response->getHeader('Location')), 'Invalid');
+                return $next->handle($request->withHeader('Location', $response->getHeader('Location')));
+            } else if ($response_json['error'] === 'Expired') {
+                // Lorsque l'access token n'est plus valide, le client utilise le refresh token pour obtenir un nouvel access token
 
+                if (!$request->hasHeader('Location'))
+                    throw new HttpUnauthorizedException($request, 'No redirection url provided');
+
+                try {
                     $response = $client->request('POST', '/api/users/refresh', [
-                        'headers' => ['Authorization' => $request->getHeader('Authorization')]
+                        'headers' => $headers
                     ]);
 
+                    $request->getBody()->write($response->getBody()->getContents());
+                    return $next->handle($request);
+                } catch (RequestException $e) {
+                    $response = $e->getResponse();
+                    $response_json = json_decode($response->getBody()->getContents(), true);
 
+                    if ($response_json['error'] === 'Invalid') {
+                        // Le serveur répond avec une erreur Invalid et une url de redirection vers l'authentification
+
+                        if (!$response->hasHeader('Location'))
+                            throw new HttpUnauthorizedException($request, 'No redirection url provided');
+
+                        // Redirection
+                        var_dump($request->withHeader('Location', $response->getHeader('Location')), 'Invalid');
+                        return $next->handle($request->withHeader('Location', $response->getHeader('Location')));
+                    } else {
+                        throw new HttpUnauthorizedException($request, 'No redirection url provided');
+                    }
                 }
             }
-
-        } catch (GuzzleException $e) {
-            throw new HttpUnauthorizedException($request, 'Invalid authorization token provided');
         }
 
         return $next->handle($request);

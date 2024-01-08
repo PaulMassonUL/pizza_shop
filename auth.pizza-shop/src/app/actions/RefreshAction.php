@@ -7,6 +7,7 @@ use pizzashop\auth\domain\service\AuthServiceInvalidTokenException;
 use pizzashop\auth\domain\service\iAuth;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use Slim\Routing\RouteContext;
 
 class RefreshAction extends Action
 {
@@ -20,8 +21,6 @@ class RefreshAction extends Action
     public function __invoke(Request $rq, Response $rs, array $args): Response
     {
 
-        if (!$rq->hasHeader('Authorization')) return $rs->withStatus(400);
-
         try {
             $token = $rq->getHeader('Authorization')[0];
             $token = str_replace('Bearer ', '', $token);
@@ -32,8 +31,10 @@ class RefreshAction extends Action
 
             return $rs->withStatus(201);
         } catch (AuthServiceInvalidTokenException $e) {
-            $rs->getBody()->write(json_encode(['error' => $e->getMessage()]));
-            return $rs->withStatus(401);
+            $routeParser = RouteContext::fromRequest($rq)->getRouteParser();
+
+            $rs->getBody()->write(json_encode(['error' => 'Invalid', 'message' => $e->getMessage()]));
+            return $rs->withStatus(401)->withHeader('Location', $routeParser->urlFor('signin'));
         }
     }
 }

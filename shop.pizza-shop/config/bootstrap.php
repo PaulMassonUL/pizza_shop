@@ -1,6 +1,7 @@
 <?php
 
 use DI\ContainerBuilder;
+use pizzashop\shop\domain\middleware\Cors;
 
 $builder = new ContainerBuilder();
 
@@ -12,6 +13,7 @@ $c=$builder->build();
 
 $app = \Slim\Factory\AppFactory::createFromContainer($c);
 
+$app->add(new Cors());
 
 $app->addRoutingMiddleware();
 $app->addBodyParsingMiddleware();

@@ -2,14 +2,13 @@
 
 namespace pizzashop\auth\app\actions;
 
-use pizzashop\auth\domain\dto\CredentialsDTO;
 use pizzashop\auth\domain\dto\TokenDTO;
-use pizzashop\auth\domain\service\AuthServiceCredentialsException;
 use pizzashop\auth\domain\service\AuthServiceExpiredTokenException;
 use pizzashop\auth\domain\service\AuthServiceInvalidTokenException;
 use pizzashop\auth\domain\service\iAuth;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use Slim\Routing\RouteContext;
 
 class ValidateAction extends Action
 {
@@ -23,7 +22,7 @@ class ValidateAction extends Action
     public function __invoke(Request $rq, Response $rs, array $args): Response
     {
 
-        if (!$rq->hasHeader('Authorization')) return $rs->withStatus(400);
+        $routeParser = RouteContext::fromRequest($rq)->getRouteParser();
 
         try {
             $token = $rq->getHeader('Authorization')[0];
@@ -34,9 +33,12 @@ class ValidateAction extends Action
             $rs->getBody()->write($userDTO->toJson());
 
             return $rs->withStatus(201);
-        } catch (AuthServiceExpiredTokenException | AuthServiceInvalidTokenException $e) {
-            $rs->getBody()->write(json_encode(['error' => $e->getMessage()]));
+        } catch (AuthServiceExpiredTokenException $e) {
+            $rs->getBody()->write(json_encode(['error' => 'Expired', 'message' => $e->getMessage()]));
             return $rs->withStatus(401);
+        } catch (AuthServiceInvalidTokenException $e) {
+            $rs->getBody()->write(json_encode(['error' => 'Invalid', 'message' => $e->getMessage()]));
+            return $rs->withStatus(401)->withHeader('Location', $routeParser->urlFor('signin'));
         }
     }
 }

@@ -9,4 +9,6 @@ return [
     'auth.token.secret' => getenv('AUTH_SECRET'),
     'auth.token.expiration' => 3600,
     'auth.token.issuer' => $_SERVER['HTTP_HOST'],
+
+    'auth.allowed_origin' => 'localhost:2080',
 ];

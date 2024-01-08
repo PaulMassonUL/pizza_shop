@@ -20,8 +20,6 @@ class SigninAction extends Action
     public function __invoke(Request $rq, Response $rs, array $args): Response
     {
 
-        if (!$rq->hasHeader('Authorization')) return $rs->withStatus(400);
-
         try {
             $credentials = $rq->getHeader('Authorization')[0];
             $credentials = str_replace('Basic ', '', $credentials);

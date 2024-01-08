@@ -11,7 +11,6 @@ services:
     env_file: ./shop.env
     ports:
       - '2080:80'
-      - '1443:443'
     volumes:
       - ../shop.pizza-shop/public:/var/www/html
       - ../shop.pizza-shop:/var/www
@@ -70,7 +69,6 @@ services:
     env_file: ./auth.env
     ports:
       - '2780:80'
-      - '2743:443'
     volumes:
       - ../auth.pizza-shop/public:/var/www/html
       - ../auth.pizza-shop:/var/www

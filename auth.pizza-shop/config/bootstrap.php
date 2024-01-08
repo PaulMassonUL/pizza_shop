@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Capsule\Manager;
-use pizzashop\shop\domain\middleware\Cors;
+use pizzashop\auth\domain\middleware\Cors;
 
 $builder = new \DI\ContainerBuilder();
 
@@ -13,7 +13,7 @@ $c = $builder->build();
 
 $app = \Slim\Factory\AppFactory::createFromContainer($c);
 
-$app->add(new Cors());
+$app->add(new Cors($app->getContainer()->get('auth.allowed_origin')));
 
 $app->addRoutingMiddleware();
 $app->addBodyParsingMiddleware();
