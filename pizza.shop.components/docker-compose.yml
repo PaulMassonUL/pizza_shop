@@ -23,6 +23,23 @@ services:
       - pizza-shop.commande.db
       - pizza-shop.catalogue.db
 
+  # service api.pizza-catalog : api pour le catalogue
+  #
+  api.pizza-catalog:
+    image: 'canals/php:latest'
+    env_file: ./cat.env
+    ports:
+      - '2180:80'
+    volumes:
+      - ../catalog.pizza-shop/public:/var/www/html
+      - ../catalog.pizza-shop:/var/www
+    working_dir: /var/www/
+    networks:
+      pizza-shop.net:
+        aliases:
+          - api.pizza-catalog.local
+    depends_on:
+      - pizza-shop.catalogue.db
 
 
   # service sql pour le stockage des commandes -
