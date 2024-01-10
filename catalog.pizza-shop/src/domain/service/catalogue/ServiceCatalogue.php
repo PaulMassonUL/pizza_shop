@@ -8,21 +8,22 @@ use pizzashop\catalog\domain\entities\catalogue\Produit;
 class ServiceCatalogue implements iInfoCatalogue
 {
 
-    public function getProduit(int $numero, int $taille): ProduitDTO
+    public function getProduitById(int $id): ProduitDTO
     {
         try {
-            $produit = Produit::where('numero', $numero)->firstOrFail();
-
-            $taille = $produit->tailles()->where('taille_id', $taille)->firstOrFail();
-
+            $produit = Produit::findOrFail($id);
             $produitDTO = new ProduitDTO(
+                $produit->id,
                 $produit->numero,
                 $produit->libelle,
-                $taille->libelle,
-                $taille->pivot->tarif
+                $produit->description
             );
+            $produitDTO->tarif_normale = $produit->tailles()->where('taille_id', 1)->firstOrFail()->pivot->tarif;
+            $produitDTO->tarif_grande = $produit->tailles()->where('taille_id', 2)->firstOrFail()->pivot->tarif;
+            $produitDTO->image = $produit->image;
+            $produitDTO->categorie = $produit->categorie->libelle;
         } catch (\Exception) {
-            throw new ServiceCatalogueNotFoundException("Produit $numero non trouvée");
+            throw new ServiceCatalogueNotFoundException("Produit $id non trouvée");
         }
         return $produitDTO;
     }
@@ -36,8 +37,22 @@ class ServiceCatalogue implements iInfoCatalogue
                 $produit->id,
                 $produit->numero,
                 $produit->libelle,
-                $produit->description,
-                $produit->tailles()->first()->pivot->tarif
+                $produit->description
+            );
+        }
+        return $produitsDTO;
+    }
+
+    public function getProduitsCategorie(int $id_categorie): array
+    {
+        $produits = Produit::where('categorie_id', $id_categorie)->get();
+        $produitsDTO = [];
+        foreach ($produits as $produit) {
+            $produitsDTO[] = new ProduitDTO(
+                $produit->id,
+                $produit->numero,
+                $produit->libelle,
+                $produit->description
             );
         }
         return $produitsDTO;

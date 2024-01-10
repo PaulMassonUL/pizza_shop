@@ -9,5 +9,7 @@ interface iInfoCatalogue
     /**
      * @throws ServiceCatalogueNotFoundException
      */
-    function getProduit(int $numero, int $taille): ProduitDTO;
+    public function getProduitById(int $id): ProduitDTO;
+
+    public function getProduits(): array;
 }
