@@ -10,7 +10,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpNotFoundException;
 
-class GetProduitsAction extends Action
+class GetProduitAction extends Action
 {
     private ServiceCatalogue $serviceCatalogue;
 
@@ -21,27 +21,24 @@ class GetProduitsAction extends Action
 
     public function __invoke(Request $rq, Response $rs, array $args): Response
     {
-        try{
-            $produits = $this->serviceCatalogue->getProduits();
+        try {
+            $produit = $this->serviceCatalogue->getProduitById((int)$args['id_produit']);
             $data = [
-                'type' => 'collection',
-                'produits' => []
-            ];
-            foreach ($produits as $produit) {
-                $data['produits'][] = [
+                'type' => 'resource',
+                'produit' => [
                     'id' => $produit->id,
                     'numero' => $produit->numero,
                     'libelle' => $produit->libelle_produit,
-                    'links' => [
-                        [
-                            'rel' => 'detail',
-                            'href' => $rq->getUri()->getScheme() . '://' . $rq->getUri()->getHost() . ':' . $rq->getUri()->getPort() . '/produit/' . $produit->id
-                        ]
-                    ]
-                ];
-            }
+                    'description' => $produit->description,
+                    'tarif_normale' => $produit->tarif_normale,
+                    'tarif_grande' => $produit->tarif_grande,
+                    'image' => $produit->image,
+                    'categorie' => $produit->categorie
+                ]
+            ];
             $rs->getBody()->write(json_encode($data));
             return $rs->withHeader('Content-Type', 'application/json;charset=utf-8');
+
         } catch (ServiceCatalogueNotFoundException $e) {
             throw new HttpNotFoundException($rq, $e->getMessage());
         }

@@ -2,7 +2,6 @@
 
 namespace pizzashop\catalog\app\actions;
 
-
 use pizzashop\catalog\domain\service\catalogue\iInfoCatalogue;
 use pizzashop\catalog\domain\service\catalogue\ServiceCatalogue;
 use pizzashop\catalog\domain\service\catalogue\ServiceCatalogueNotFoundException;
@@ -10,7 +9,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpNotFoundException;
 
-class GetProduitsAction extends Action
+class GetProduitsCategorieAction extends Action
 {
     private ServiceCatalogue $serviceCatalogue;
 
@@ -22,7 +21,7 @@ class GetProduitsAction extends Action
     public function __invoke(Request $rq, Response $rs, array $args): Response
     {
         try{
-            $produits = $this->serviceCatalogue->getProduits();
+            $produits = $this->serviceCatalogue->getProduitsCategorie($args['id_categorie']);
             $data = [
                 'type' => 'collection',
                 'produits' => []
