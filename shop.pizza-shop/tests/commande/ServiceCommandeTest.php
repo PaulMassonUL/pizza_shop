@@ -105,11 +105,11 @@ class ServiceCommandeTest extends \PHPUnit\Framework\TestCase
             self::$faker->email,
             Commande::TYPE_LIVRAISON_DOMICILE,
             array(
-                new ItemDTO(
-                    self::$faker->numberBetween(1, 5),
-                    self::$faker->numberBetween(1, 2),
-                    self::$faker->numberBetween(1, 5)
-                )
+                [
+                    'numero' => self::$faker->numberBetween(1, 5),
+                    'taille' => self::$faker->numberBetween(1, 2),
+                    'quantite' => self::$faker->numberBetween(1, 5)
+                ],
             )
         ));
         $this->assertNotNull($commandeDTO);

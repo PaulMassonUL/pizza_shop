@@ -49,7 +49,7 @@ class ServiceCommande implements iCommander
             throw new ServiceCommandeNotFoundException("Commande $id non trouvée");
         }
         if ($commande->etat >= Commande::ETAT_VALIDE) {
-            $etat = match($commande->etat) {
+            $etat = match ($commande->etat) {
                 Commande::ETAT_VALIDE => Commande::ETAT_VALIDE_LIBELLE,
                 Commande::ETAT_PAYEE => Commande::ETAT_PAYEE_LIBELLE,
                 default => '',
@@ -77,22 +77,34 @@ class ServiceCommande implements iCommander
             'delai' => 0,
             'etat' => Commande::ETAT_CREE
         ]);
-        //creer les items
-        foreach ($c->items as $itemDTO) {
-            try {
-                $infoItem = $this->serviceCatalogue->getProduit($itemDTO->numero, $itemDTO->taille);
-            } catch (ServiceCatalogueNotFoundException) {
-                throw new ServiceCommandeInvalidDataException("Produit non trouvé");
-            }
-            $item = new Item();
-            $item->numero = $itemDTO->numero;
-            $item->taille = $itemDTO->taille;
-            $item->quantite = $itemDTO->quantite;
 
-            $item->libelle = $infoItem->libelle_produit;
-            $item->libelle_taille = $infoItem->libelle_taille;
-            $item->tarif = $infoItem->tarif;
-            $commande->items()->save($item);
+        // Collectez tous les numéros et tailles d'item distincts de la commande
+        $numerostaillesItems = array_map(function ($itemDTO) {
+            return $itemDTO->numero . '-' . $itemDTO->taille;
+        }, $c->items);
+        $numerostaillesItems = array_unique($numerostaillesItems);
+
+        // Utilisez ces numéros et tailles pour effectuer une seule requête vers le catalogue
+        try {
+            $infosItems = $this->serviceCatalogue->getProduits($numerostaillesItems);
+
+            // Créez les items de la commande en utilisant les informations obtenues
+            foreach ($c->items as $itemDTO) {
+                $key = $itemDTO->numero . '-' . $itemDTO->taille;
+                $infoItem = $infosItems[$key];
+
+                $item = new Item();
+                $item->numero = $itemDTO->numero;
+                $item->taille = $itemDTO->taille;
+                $item->quantite = $itemDTO->quantite;
+                $item->libelle = $infoItem->libelle_produit;
+                $item->libelle_taille = $infoItem->libelle_taille;
+                $item->tarif = $infoItem->tarif;
+
+                $commande->items()->save($item);
+            }
+        } catch (ServiceCatalogueNotFoundException) {
+            throw new ServiceCommandeInvalidDataException("Produit non trouvé");
         }
 
         $commande->calculerMontantTotal();
@@ -112,16 +124,15 @@ class ServiceCommande implements iCommander
                 ->attribute('type_livraison', v::in([Commande::TYPE_LIVRAISON_SUR_PLACE, Commande::TYPE_LIVRAISON_DOMICILE, Commande::TYPE_LIVRAISON_A_EMPORTER]))
                 ->attribute('items', v::arrayVal()->notEmpty()
                     ->each(v::attribute('numero', v::intVal()->positive())
-                        ->attribute('taille', v::in([1,2]))
+                        ->attribute('taille', v::in([1, 2]))
                         ->attribute('quantite', v::intVal()->positive())
-                ))
+                    ))
                 ->assert($c);
 
         } catch (NestedValidationException $e) {
             throw new ServiceCommandeInvalidDataException("Données de commande invalides");
         }
     }
-
 
 
 }
