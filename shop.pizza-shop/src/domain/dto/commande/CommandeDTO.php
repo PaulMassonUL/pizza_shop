@@ -22,6 +22,7 @@ class CommandeDTO extends \pizzashop\shop\domain\dto\DTO
     {
         $this->type_livraison = $type_livraison;
         $this->mail_client = $mail_client;
+        $this->items = [];
         foreach ($items as $item) {
             $this->items[] = new ItemDTO($item['numero'], $item['taille'], $item['quantite']);
         }

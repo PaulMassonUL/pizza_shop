@@ -8,7 +8,7 @@ return function(\Slim\App $app):void {
     $JwtVerification = new Jwt($app->getContainer()->get('auth.api.base_uri'));
 
     $app->post('/commandes[/]', \pizzashop\shop\app\actions\CreerCommandeAction::class)
-        ->setName('creer_commande')->add($JwtVerification);
+        ->setName('creer_commande');
 
     $app->get('/commandes/{id_commande}[/]', \pizzashop\shop\app\actions\AccederCommandeAction::class)
         ->setName('commande')->add($JwtVerification);

@@ -24,4 +24,18 @@ class Produit extends \Illuminate\database\eloquent\Model
             ->withPivot('tarif');
     }
 
+    public function toDTO(): ProduitDTO
+    {
+        $produitDTO = new ProduitDTO(
+            $this->id,
+            $this->numero,
+            $this->libelle,
+            $this->description
+        );
+        $produitDTO->tailles = $this->tailles()->get()->toArray();
+        $produitDTO->categorie = $this->categorie()->get()->toArray();
+        $produitDTO->image = $this->image;
+        return $produitDTO;
+    }
+
 }

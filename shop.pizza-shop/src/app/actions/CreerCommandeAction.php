@@ -26,6 +26,10 @@ class CreerCommandeAction extends Action
         // Récupérez les données JSON du corps de la requête
         $data = $rq->getParsedBody();
 
+        if (!isset($data['mail_client']) || !isset($data['type_livraison']) || !isset($data['items'])) {
+            throw new HttpBadRequestException($rq, 'Données invalides');
+        }
+
         try {
             // Créez un DTO à partir des données reçues
             $commandeDTO = new CommandeDTO($data['mail_client'], $data['type_livraison'], $data['items']);

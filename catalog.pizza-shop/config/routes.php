@@ -12,4 +12,7 @@ return function(\Slim\App $app):void {
     $app->get('/categories/{id_categorie}/produits[/]', \pizzashop\catalog\app\actions\GetProduitsCategorieAction::class)
         ->setName('produits_categorie');
 
+    $app->get('/produits-commande[/]', \pizzashop\catalog\app\actions\GetProduitsCommandeAction::class)
+        ->setName('produits_commande');
+
 };

@@ -3,11 +3,11 @@
 namespace pizzashop\shop\domain\service\commande;
 
 use Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use pizzashop\shop\domain\dto\commande\CommandeDTO;
 use pizzashop\shop\domain\entities\commande\Commande;
 use pizzashop\shop\domain\entities\commande\Item;
-use pizzashop\shop\domain\service\catalogue\iInfoCatalogue;
-use pizzashop\shop\domain\service\catalogue\ServiceCatalogueNotFoundException;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Respect\Validation\Exceptions\NestedValidationException;
@@ -15,13 +15,13 @@ use Respect\Validation\Validator as v;
 
 class ServiceCommande implements iCommander
 {
-    private iInfoCatalogue $serviceCatalogue;
+    private string $catalog_uri;
     private LoggerInterface $logger;
 
-    public function __construct(iInfoCatalogue $serviceCatalogue, LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, string $catalog_uri)
     {
-        $this->serviceCatalogue = $serviceCatalogue;
         $this->logger = $logger;
+        $this->catalog_uri = $catalog_uri;
     }
 
     /**
@@ -30,7 +30,7 @@ class ServiceCommande implements iCommander
     public function accederCommande(string $id): CommandeDTO
     {
         try {
-            $commande = Commande::findOrFail($id);
+            $commande = Commande::findOrFail($id)->with('items')->first();
         } catch (Exception) {
             throw new ServiceCommandeNotFoundException("Commande $id non trouvée");
         }
@@ -78,15 +78,30 @@ class ServiceCommande implements iCommander
             'etat' => Commande::ETAT_CREE
         ]);
 
-        // Collectez tous les numéros et tailles d'item distincts de la commande
-        $numerostaillesItems = array_map(function ($itemDTO) {
-            return $itemDTO->numero . '-' . $itemDTO->taille;
-        }, $c->items);
-        $numerostaillesItems = array_unique($numerostaillesItems);
+        $client = new Client([
+            'base_uri' => $this->catalog_uri,
+            'timeout' => 30.0
+        ]);
 
-        // Utilisez ces numéros et tailles pour effectuer une seule requête vers le catalogue
+        $headers = [
+            'Origin' => $_SERVER['HTTP_HOST'],
+            'Content-Type' => 'application/json'
+        ];
+
+        $numerostaillesItems = array_map(function ($itemDTO) {
+            return ['numero' => $itemDTO->numero, 'taille' => $itemDTO->taille];
+        }, $c->items);
+        $numerostaillesItems = array_unique($numerostaillesItems, SORT_REGULAR);
+
         try {
-            $infosItems = $this->serviceCatalogue->getProduits($numerostaillesItems);
+            $response = $client->request('GET', '/produits-commande', [
+                'headers' => $headers,
+                'body' => json_encode($numerostaillesItems)
+            ]);
+            var_dump(json_decode($response->getBody()->getContents()));
+
+            $infosItems = json_decode($response->getBody()->getContents());
+            var_dump($infosItems);
 
             // Créez les items de la commande en utilisant les informations obtenues
             foreach ($c->items as $itemDTO) {
@@ -103,8 +118,8 @@ class ServiceCommande implements iCommander
 
                 $commande->items()->save($item);
             }
-        } catch (ServiceCatalogueNotFoundException) {
-            throw new ServiceCommandeInvalidDataException("Produit non trouvé");
+        } catch (RequestException $e) {
+            throw new ServiceCommandeInvalidDataException("Impossible de récupérer les informations des produits : " . $e->getMessage());
         }
 
         $commande->calculerMontantTotal();
@@ -130,9 +145,13 @@ class ServiceCommande implements iCommander
                 ->assert($c);
 
         } catch (NestedValidationException $e) {
-            throw new ServiceCommandeInvalidDataException("Données de commande invalides");
+            throw new ServiceCommandeInvalidDataException("Données de commande invalides : " . $e->getFullMessage());
         }
     }
 
+    public function getItemsInfo(array $items): array
+    {
+
+    }
 
 }

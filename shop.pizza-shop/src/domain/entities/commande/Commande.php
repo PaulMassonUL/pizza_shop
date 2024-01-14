@@ -46,7 +46,7 @@ class Commande extends Model
         $c = new CommandeDTO(
             $this->mail_client,
             $this->type_livraison,
-            $this->items->toArray()
+            []
         );
         $c->id = $this->id;
         $c->date_commande = $this->date_commande;
@@ -54,9 +54,7 @@ class Commande extends Model
         $c->etat = $this->etat;
         $c->delai = $this->delai;
 
-
-        $c->items = [];
-        foreach ($this->items()->get() as $item) {
+        foreach ($this->items as $item) {
             $c->items[] = $item->toDTO();
         }
 

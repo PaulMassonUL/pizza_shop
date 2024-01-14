@@ -12,20 +12,10 @@ class ServiceCatalogue implements iInfoCatalogue
     {
         try {
             $produit = Produit::findOrFail($id);
-            $produitDTO = new ProduitDTO(
-                $produit->id,
-                $produit->numero,
-                $produit->libelle,
-                $produit->description
-            );
-            $produitDTO->tarif_normale = $produit->tailles()->where('taille_id', 1)->firstOrFail()->pivot->tarif;
-            $produitDTO->tarif_grande = $produit->tailles()->where('taille_id', 2)->firstOrFail()->pivot->tarif;
-            $produitDTO->image = $produit->image;
-            $produitDTO->categorie = $produit->categorie->libelle;
         } catch (\Exception) {
             throw new ServiceCatalogueNotFoundException("Produit $id non trouvée");
         }
-        return $produitDTO;
+        return $produit->toDTO();
     }
 
     public function getProduits(): array
@@ -33,13 +23,46 @@ class ServiceCatalogue implements iInfoCatalogue
         $produits = Produit::all();
         $produitsDTO = [];
         foreach ($produits as $produit) {
-            $produitsDTO[] = new ProduitDTO(
-                $produit->id,
-                $produit->numero,
-                $produit->libelle,
-                $produit->description
-            );
+            $produitsDTO[] = $produit->toDTO();
         }
+        return $produitsDTO;
+    }
+
+    public function getProduitsCommande(array $numerostailles): array
+    {
+        $produitsDTO = [];
+
+        try {
+            $produits = Produit::whereIn('numero', array_column($numerostailles, 'numero'))
+                ->with('tailles') // Charger la relation tailles
+                ->get();
+            var_dump($numerostailles);
+            foreach ($numerostailles as $numerotaille) {
+                $produit = $produits->firstWhere('numero', $numerotaille['numero']);
+
+                if ($produit) {
+                    $taille = $produit->tailles->where('id', $numerotaille['taille'])->first();
+
+                    if ($taille) {
+                        $produitsDTO[$produit->numero . '-' . $taille->id] = [
+                            'id' => $produit->id,
+                            'numero' => $produit->numero,
+                            'libelle_produit' => $produit->libelle,
+                            'description' => $produit->description,
+                            'image' => $produit->image,
+                            'categorie' => $produit->categorie->toArray(),
+                            'taille' => [
+                                'libelle' => $taille->libelle,
+                                'tarif' => $taille->pivot->tarif
+                            ]
+                        ];
+                    }
+                }
+            }
+        } catch (\Exception) {
+            throw new ServiceCatalogueNotFoundException("Erreur lors de la récupération des produits");
+        }
+
         return $produitsDTO;
     }
 

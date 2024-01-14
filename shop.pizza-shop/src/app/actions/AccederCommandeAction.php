@@ -40,6 +40,7 @@ class AccederCommandeAction extends Action
                     'delai' => $commande->delai
                 ]
             ];
+            var_dump($commande->items);
             foreach ($commande->items as $item) {
                 $data['commande']['items'] = [
                     'numero' => $item->numero,

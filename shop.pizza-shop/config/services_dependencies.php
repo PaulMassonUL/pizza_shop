@@ -8,12 +8,8 @@ return [
       return $log;
   },
 
-  'catalogue.service' => function(\Psr\Container\ContainerInterface $c) {
-      return new \pizzashop\shop\domain\service\catalogue\ServiceCatalogue();
-  },
-
   'commande.service' => function(\Psr\Container\ContainerInterface $c) {
-      return new \pizzashop\shop\domain\service\commande\ServiceCommande($c->get('catalogue.service'), $c->get('commande.logger'));
+      return new \pizzashop\shop\domain\service\commande\ServiceCommande($c->get('commande.logger'), $c->get('catalog.api.base_uri'));
   },
 
 ];
