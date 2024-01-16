@@ -4,6 +4,7 @@ namespace pizzashop\shop\domain\service\commande;
 
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use pizzashop\shop\domain\dto\commande\CommandeDTO;
 use pizzashop\shop\domain\entities\commande\Commande;
@@ -62,7 +63,7 @@ class ServiceCommande implements iCommander
     }
 
     /**
-     * @throws ServiceCommandeInvalidDataException
+     * @throws ServiceCommandeInvalidDataException|GuzzleException
      */
     public function creerCommande(CommandeDTO $c): CommandeDTO
     {
