@@ -1,7 +1,7 @@
 # pizza_shop
 
 ## Membres du groupe :
-Paul MASSON, Mathis SEILER, Julie WALTISPURGER, Sarah 
+Paul MASSON, Mathis SEILER
 
 ## Dépot git :
 https://github.com/PaulMassonUL/pizza_shop/
