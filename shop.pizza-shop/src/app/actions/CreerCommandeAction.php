@@ -48,7 +48,7 @@ class CreerCommandeAction extends Action
                     'delai' => $commande->delai
                 ];
             foreach ($commande->items as $item) {
-                $donnees['items'] = [
+                $donnees['items'][] = [
                     'numero' => $item->numero,
                     'taille' => $item->taille,
                     'quantite' => $item->quantite,

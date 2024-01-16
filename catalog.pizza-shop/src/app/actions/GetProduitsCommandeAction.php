@@ -31,7 +31,7 @@ class GetProduitsCommandeAction extends Action
             ];
 
             $rs->getBody()->write(json_encode($data));
-            return $rs->withHeader('Content-Type', 'application/json;charset=utf-8');
+            return $rs->withStatus(200);
         } catch (ServiceCatalogueNotFoundException $e) {
             throw new HttpNotFoundException($rq, $e->getMessage());
         }

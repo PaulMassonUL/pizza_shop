@@ -36,7 +36,7 @@ class ServiceCatalogue implements iInfoCatalogue
             $produits = Produit::whereIn('numero', array_column($numerostailles, 'numero'))
                 ->with('tailles') // Charger la relation tailles
                 ->get();
-            var_dump($numerostailles);
+
             foreach ($numerostailles as $numerotaille) {
                 $produit = $produits->firstWhere('numero', $numerotaille['numero']);
 

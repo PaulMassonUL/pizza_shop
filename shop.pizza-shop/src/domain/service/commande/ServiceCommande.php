@@ -86,7 +86,7 @@ class ServiceCommande implements iCommander
 
         $headers = [
             'Origin' => $_SERVER['HTTP_HOST'],
-            'Content-Type' => 'application/json'
+            'Content-Type' => 'application/json;charset=utf-8'
         ];
 
         $numerostaillesItems = array_map(function ($itemDTO) {
@@ -99,23 +99,21 @@ class ServiceCommande implements iCommander
                 'headers' => $headers,
                 'body' => json_encode($numerostaillesItems)
             ]);
-            var_dump(json_decode($response->getBody()->getContents()));
 
-            $infosItems = json_decode($response->getBody()->getContents());
-            var_dump($infosItems);
+            $infosItems = json_decode($response->getBody()->getContents(), true);
 
             // Créez les items de la commande en utilisant les informations obtenues
             foreach ($c->items as $itemDTO) {
                 $key = $itemDTO->numero . '-' . $itemDTO->taille;
-                $infoItem = $infosItems[$key];
+                $infoItem = $infosItems["produits"][$key];
 
                 $item = new Item();
                 $item->numero = $itemDTO->numero;
                 $item->taille = $itemDTO->taille;
                 $item->quantite = $itemDTO->quantite;
-                $item->libelle = $infoItem->libelle_produit;
-                $item->libelle_taille = $infoItem->libelle_taille;
-                $item->tarif = $infoItem->tarif;
+                $item->libelle = $infoItem['libelle_produit'];
+                $item->libelle_taille = $infoItem['taille']['libelle'];
+                $item->tarif = $infoItem['taille']['tarif'];
 
                 $commande->items()->save($item);
             }
@@ -148,11 +146,6 @@ class ServiceCommande implements iCommander
         } catch (NestedValidationException $e) {
             throw new ServiceCommandeInvalidDataException("Données de commande invalides : " . $e->getFullMessage());
         }
-    }
-
-    public function getItemsInfo(array $items): array
-    {
-
     }
 
 }
