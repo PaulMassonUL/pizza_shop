@@ -33,3 +33,8 @@
 ##### draw.io temp files
 *.bkp
 *.dtmp
+
+
+##### RabbitMQ
+**/mnesia/
+**/.erlang.cookie
