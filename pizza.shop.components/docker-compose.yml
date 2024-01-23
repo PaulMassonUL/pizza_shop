@@ -30,7 +30,7 @@ services:
   # service api.pizza-catalog : api pour le catalogue
   #
   api.pizza-catalog:
-    image: 'canals/php:latest'
+    image: 'canals/php:8.2'
     env_file: ./cat.env
     ports:
       - '2180:80'
@@ -86,7 +86,7 @@ services:
 ###  utilise sa propre base de données
 ######################################
   api.pizza-auth:
-    image: 'canals/php:latest'
+    image: 'canals/php:8.2'
     env_file: ./auth.env
     ports:
       - '2780:80'
