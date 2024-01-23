@@ -8,7 +8,9 @@ use Psr\Container\ContainerInterface;
 return [
 
     ValiderCommandeAction::class => function (ContainerInterface $container) {
-        return new ValiderCommandeAction($container->get('commande.service'));
+        $commandeService = $container->get('commande.service');
+        $rabbitmqChannel = $container->get('rabbitmq.channel');
+        return new ValiderCommandeAction($commandeService, $rabbitmqChannel);
     },
 
     AccederCommandeAction::class => function (ContainerInterface $container) {

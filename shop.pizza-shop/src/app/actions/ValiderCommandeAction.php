@@ -2,6 +2,7 @@
 
 namespace pizzashop\shop\app\actions;
 
+use PhpAmqpLib\Message\AMQPMessage;
 use pizzashop\shop\domain\entities\commande\Commande;
 use pizzashop\shop\domain\service\commande\iCommander;
 use pizzashop\shop\domain\service\commande\ServiceCommande;
@@ -16,10 +17,12 @@ class ValiderCommandeAction extends Action
 {
 
     private ServiceCommande $serviceCommande;
+    private $channel;
 
-    public function __construct(iCommander $serviceCommande)
+    public function __construct(iCommander $serviceCommande, $channel)
     {
         $this->serviceCommande = $serviceCommande;
+        $this->channel = $channel;
     }
 
     public function __invoke(Request $rq, Response $rs, array $args): Response
@@ -38,6 +41,11 @@ class ValiderCommandeAction extends Action
             };
 
             $rs->getBody()->write(json_encode(['etat' => $etat]));
+            $this->channel->basic_publish(new AMQPMessage(json_encode($commande)),
+                'pizzashop',
+                'nouvelle'
+            );
+            $this->channel->close();
         } catch (ServiceCommandeNotFoundException $e) {
             throw new HttpNotFoundException($rq, $e->getMessage());
         } catch (ServiceCommandeInvalidTransitionException $e) {

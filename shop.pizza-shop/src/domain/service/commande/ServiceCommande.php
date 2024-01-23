@@ -59,6 +59,12 @@ class ServiceCommande implements iCommander
         }
         $commande->update(['etat' => Commande::ETAT_VALIDE]);
         $this->logger->info("Commande $id validée");
+
+        // Appeler le script existant pour publier la commande dans la file AMQP
+        $scriptPath = '../../../../scripts/publier_nouvelles_commandes.php';
+        $command = "php $scriptPath";
+        $output = shell_exec($command);
+
         return $commande->toDTO();
     }
 
