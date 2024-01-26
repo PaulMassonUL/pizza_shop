@@ -1,15 +1,21 @@
 <?php
 
-namespace pizzashop\shop\domain\middleware;
+namespace pizzashop\gateway\domain\middleware;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Slim\Exception\HttpUnauthorizedException;
 
 class Cors
 {
+
     public function __invoke(ServerRequestInterface $rq, RequestHandlerInterface $next): ResponseInterface
     {
+
+        if (!$rq->hasHeader('Origin')) {
+            throw new HttpUnauthorizedException($rq, "missing Origin Header (cors)");
+        }
 
         $response = $next->handle($rq);
         return $response->withHeader('Access-Control-Allow-Origin', $rq->getHeaderLine('Origin'))

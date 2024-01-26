@@ -7,6 +7,7 @@ use pizzashop\auth\domain\service\AuthServiceCredentialsException;
 use pizzashop\auth\domain\service\iAuth;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use Slim\Exception\HttpUnauthorizedException;
 
 class SigninAction extends Action
 {
@@ -19,6 +20,9 @@ class SigninAction extends Action
 
     public function __invoke(Request $rq, Response $rs, array $args): Response
     {
+        if (!$rq->hasHeader('Authorization')) {
+            throw new HttpUnauthorizedException($rq, "missing Authorization Header");
+        }
 
         try {
             $credentials = $rq->getHeader('Authorization')[0];

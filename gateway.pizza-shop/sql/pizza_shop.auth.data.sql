@@ -46,7 +46,6 @@ INSERT INTO `users` (`email`, `password`, `active`, `activation_token`, `activat
 ('ThéophileBouvier@live.com',	'$2y$10$5VReUT5/AnzJs.JAM0QxO.elp3CDLjkPekAwQUenBFq2tSNr574Ii',	0,	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'ThéophileBouvier'),
 ('ThomasBaudry@dbmail.com',	'$2y$10$GX01nrwmeEJm7yiG4aEwz.JwK9FigcPXGUNVzgwAwy4.kQsCdhtEK',	0,	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'ThomasBaudry'),
 ('VincentLaine@tele2.fr',	'$2y$10$Biu6slyeC82mvuha8WP6/OJNVHNQ13.JmAO8vpRfLKLqacrZoxG7a',	0,	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'VincentLaine'),
-('ZacharieLefort@sfr.fr',	'$2y$10$x9i0uJJ2fFOdQhEgkzA8..pNhTwROf6MgYGO9PRHVieFFiKypxRfG',	0,	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'ZacharieLefort'),
-('mail@example.com',	'$2y$12$xvEWhUNthGHSPudoh.Yyd.BctDe9gho6svrtclhfYmMfO.O550Cpy',	0,	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'CoolUsername');
+('ZacharieLefort@sfr.fr',	'$2y$10$x9i0uJJ2fFOdQhEgkzA8..pNhTwROf6MgYGO9PRHVieFFiKypxRfG',	0,	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	'ZacharieLefort');
 
 -- 2023-10-03 13:52:23

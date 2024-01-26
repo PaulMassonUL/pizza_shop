@@ -1,7 +1,6 @@
 <?php
 
-use Illuminate\Database\Capsule\Manager;
-use pizzashop\auth\domain\middleware\Cors;
+use pizzashop\gateway\domain\middleware\Cors;
 
 $builder = new \DI\ContainerBuilder();
 
@@ -21,11 +20,5 @@ $errorMiddleware = $app->addErrorMiddleware(true, false, false);
 
 $errorHandler = $errorMiddleware->getDefaultErrorHandler();
 $errorHandler->forceContentType('application/json');
-
-$capsule = new Manager();
-
-$capsule->addConnection(parse_ini_file("auth.db.ini"), 'auth');
-$capsule->setAsGlobal();
-$capsule->bootEloquent();
 
 return $app;

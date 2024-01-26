@@ -2,7 +2,6 @@
 
 namespace pizzashop\auth\domain\service;
 
-use Exception;
 use pizzashop\auth\domain\dto\CredentialsDTO;
 use pizzashop\auth\domain\dto\TokenDTO;
 use pizzashop\auth\domain\dto\UserDTO;
@@ -44,7 +43,7 @@ class AuthService implements iAuth
     }
 
     /**
-     * @throws Exception
+     * @throws AuthServiceCredentialsException
      */
     public function signin(CredentialsDTO $c): TokenDTO
     {

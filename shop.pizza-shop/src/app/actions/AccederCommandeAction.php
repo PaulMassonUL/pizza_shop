@@ -23,7 +23,7 @@ class AccederCommandeAction extends Action
 
     public function __invoke(Request $rq, Response $rs, array $args): Response
     {
-        if(is_null($args['id_commande'])) throw new HttpBadRequestException($rq, 'id_commande manquant');
+        if (is_null($args['id_commande'])) throw new HttpBadRequestException($rq, 'id_commande manquant');
         try {
 
             $commande = $this->serviceCommande->accederCommande($args['id_commande']);
@@ -56,16 +56,13 @@ class AccederCommandeAction extends Action
                 'self' => [
                     'href' => $routeParser->urlFor('commande', ['id_commande' => $commande->id]),
                 ],
-
-
-
             ];
 
             $rs->getBody()->write(json_encode($data));
-            return $rs->withHeader('Content-Type', 'application/json')->withStatus(200);
+            return $rs->withStatus(200);
 
         } catch (CommandNotFoundException) {
-            return $rs->withHeader('Content-Type', 'application/json')->withStatus(404);
+            return $rs->withStatus(404);
         } catch (ServiceCommandeNotFoundException $e) {
             throw new HttpBadRequestException($rq, $e->getMessage());
         }

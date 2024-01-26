@@ -8,6 +8,7 @@ use pizzashop\auth\domain\service\AuthServiceInvalidTokenException;
 use pizzashop\auth\domain\service\iAuth;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use Slim\Exception\HttpUnauthorizedException;
 use Slim\Routing\RouteContext;
 
 class ValidateAction extends Action
@@ -21,6 +22,9 @@ class ValidateAction extends Action
 
     public function __invoke(Request $rq, Response $rs, array $args): Response
     {
+        if (!$rq->hasHeader('Authorization')) {
+            throw new HttpUnauthorizedException($rq, "missing Authorization Header");
+        }
 
         $routeParser = RouteContext::fromRequest($rq)->getRouteParser();
 
