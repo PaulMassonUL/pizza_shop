@@ -10,6 +10,7 @@ use pizzashop\shop\domain\service\commande\ServiceCommandeInvalidDataException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpBadRequestException;
+use Slim\Exception\HttpInternalServerErrorException;
 
 class CreerCommandeAction extends Action
 {
@@ -64,8 +65,7 @@ class CreerCommandeAction extends Action
         } catch (ServiceCommandeInvalidDataException $e) {
             throw new HttpBadRequestException($rq, $e->getMessage());
         } catch (Exception $e) {
-            $rs->getBody()->write(json_encode(['error' => $e->getMessage()]));
-            return $rs->withHeader('Content-Type', 'application/json;charset=utf-8')->withStatus(500);
+            throw new HttpInternalServerErrorException($rq, $e->getMessage());
         }
     }
 

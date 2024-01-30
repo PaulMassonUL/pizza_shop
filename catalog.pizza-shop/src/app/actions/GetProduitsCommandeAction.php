@@ -8,6 +8,7 @@ use pizzashop\catalog\domain\service\catalogue\ServiceCatalogue;
 use pizzashop\catalog\domain\service\catalogue\ServiceCatalogueNotFoundException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Exception\HttpInternalServerErrorException;
 use Slim\Exception\HttpNotFoundException;
 
 class GetProduitsCommandeAction extends Action
@@ -33,7 +34,7 @@ class GetProduitsCommandeAction extends Action
             $rs->getBody()->write(json_encode($data));
             return $rs->withStatus(200)->withHeader('Content-Type', 'application/json;charset=utf-8');
         } catch (ServiceCatalogueNotFoundException $e) {
-            throw new HttpNotFoundException($rq, $e->getMessage());
+            throw new HttpInternalServerErrorException($rq, $e->getMessage());
         }
 
     }

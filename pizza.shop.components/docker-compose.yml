@@ -68,6 +68,27 @@ services:
     depends_on:
       - pizza-shop.auth.db
 
+  ######################################
+  ###  GATEWAY Service : service facade qui fait passerelle vers les autres services
+  ###  api api.gateway : passerelle
+  ######################################
+  api.pizza-gateway:
+    image: 'canals/php:8.2'
+    ports:
+      - '4080:80'
+    volumes:
+      - ../gateway.pizza-shop/public:/var/www/html
+      - ../gateway.pizza-shop:/var/www
+    working_dir: /var/www
+    networks:
+      pizza-shop.net:
+        aliases:
+          - gateway.pizza-shop.local
+    depends_on:
+      - api.pizza-shop
+      - api.pizza-catalog
+      - api.pizza-auth
+
   #################################################################
   # service api.pizza-prod : api pour la prep et prod des commandes
   #################################################################
@@ -166,24 +187,3 @@ services:
     volumes:
       - ../rabbitmq.pizza-shop:/var/lib/rabbitmq
     env_file: ./rab.env
-
-  ######################################
-  ###  GATEWAY Service : service facade qui fait passerelle vers les autres services
-  ###  api api.gateway : passerelle
-  ######################################
-  api.pizza-gateway:
-    image: 'canals/php:8.2'
-    ports:
-      - '4080:80'
-    volumes:
-      - ../gateway.pizza-shop/public:/var/www/html
-      - ../gateway.pizza-shop:/var/www
-    working_dir: /var/www
-    networks:
-      pizza-shop.net:
-        aliases:
-          - gateway.pizza-shop.local
-    depends_on:
-      - api.pizza-shop
-      - api.pizza-catalog
-      - api.pizza-auth
