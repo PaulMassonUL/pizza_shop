@@ -9,7 +9,7 @@ $builder->addDefinitions(__DIR__ . '/settings.php');
 $builder->addDefinitions(__DIR__ . '/services_dependencies.php');
 $builder->addDefinitions(__DIR__ . '/actions_dependencies.php');
 
-$c=$builder->build();
+$c = $builder->build();
 
 $app = \Slim\Factory\AppFactory::createFromContainer($c);
 

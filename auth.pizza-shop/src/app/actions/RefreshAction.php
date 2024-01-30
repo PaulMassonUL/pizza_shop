@@ -33,12 +33,12 @@ class RefreshAction extends Action
 
             $rs->getBody()->write($tokenDTO->toJson());
 
-            return $rs->withStatus(201);
+            return $rs->withStatus(201)->withHeader('Content-Type', 'application/json;charset=utf-8');
         } catch (AuthServiceInvalidTokenException $e) {
             $routeParser = RouteContext::fromRequest($rq)->getRouteParser();
 
             $rs->getBody()->write(json_encode(['error' => 'Invalid', 'message' => $e->getMessage()]));
-            return $rs->withStatus(401)->withHeader('Location', $routeParser->urlFor('signin'));
+            return $rs->withStatus(401)->withHeader('Location', $routeParser->urlFor('signin'))->withHeader('Content-Type', 'application/json;charset=utf-8');
         }
     }
 }

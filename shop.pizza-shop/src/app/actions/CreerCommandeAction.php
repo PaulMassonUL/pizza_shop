@@ -59,13 +59,13 @@ class CreerCommandeAction extends Action
             }
 
             $rs->getBody()->write(json_encode($donnees));
-            return $rs->withHeader('Content-Type', 'application/json')->withHeader('Location', '/commande/' . $commande->id)->withStatus(201);
+            return $rs->withHeader('Content-Type', 'application/json;charset=utf-8')->withHeader('Location', '/commande/' . $commande->id)->withStatus(201);
 
         } catch (ServiceCommandeInvalidDataException $e) {
             throw new HttpBadRequestException($rq, $e->getMessage());
         } catch (Exception $e) {
             $rs->getBody()->write(json_encode(['error' => $e->getMessage()]));
-            return $rs->withHeader('Content-Type', 'application/json')->withStatus(500);
+            return $rs->withHeader('Content-Type', 'application/json;charset=utf-8')->withStatus(500);
         }
     }
 

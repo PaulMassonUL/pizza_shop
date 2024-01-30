@@ -50,9 +50,9 @@ class ValiderCommandeAction extends Action
             throw new HttpNotFoundException($rq, $e->getMessage());
         } catch (ServiceCommandeInvalidTransitionException $e) {
             $rs->getBody()->write(json_encode(['etat' => $e->getMessage()]));
-            return $rs->withStatus(400);
+            return $rs->withStatus(400)->withHeader('Content-Type', 'application/json;charset=utf-8');
         }
 
-        return $rs->withHeader('Content-Type', 'application/json');
+        return $rs->withHeader('Content-Type', 'application/json;charset=utf-8');
     }
 }

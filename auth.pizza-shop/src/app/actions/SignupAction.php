@@ -36,10 +36,10 @@ class SignupAction extends Action
             $credentialsDTO->username = $username;
             $this->serviceAuth->signup($credentialsDTO);
 
-            return $rs->withStatus(201);
+            return $rs->withStatus(201)->withHeader('Content-Type', 'application/json; charset=utf-8');
         } catch (AuthServiceCredentialsException $e) {
             $rs->getBody()->write(json_encode(['error' => $e->getMessage()]));
-            return $rs->withStatus(400);
+            return $rs->withStatus(400)->withHeader('Content-Type', 'application/json; charset=utf-8');
         }
     }
 }

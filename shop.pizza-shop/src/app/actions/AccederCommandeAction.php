@@ -8,6 +8,7 @@ use pizzashop\shop\domain\service\commande\ServiceCommandeNotFoundException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpBadRequestException;
+use Slim\Exception\HttpNotFoundException;
 use Slim\Routing\RouteContext;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 
@@ -40,9 +41,8 @@ class AccederCommandeAction extends Action
                     'delai' => $commande->delai
                 ]
             ];
-            var_dump($commande->items);
             foreach ($commande->items as $item) {
-                $data['commande']['items'] = [
+                $data['commande']['items'][] = [
                     'numero' => $item->numero,
                     'taille' => $item->taille,
                     'quantite' => $item->quantite,
@@ -59,10 +59,8 @@ class AccederCommandeAction extends Action
             ];
 
             $rs->getBody()->write(json_encode($data));
-            return $rs->withStatus(200);
+            return $rs->withStatus(200)->withHeader('Content-Type', 'application/json;charset=utf-8');
 
-        } catch (CommandNotFoundException) {
-            return $rs->withStatus(404);
         } catch (ServiceCommandeNotFoundException $e) {
             throw new HttpBadRequestException($rq, $e->getMessage());
         }

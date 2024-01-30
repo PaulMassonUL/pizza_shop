@@ -20,7 +20,7 @@ class UserAction extends Action
     {
         return $this->serviceGateway->request($rq->getMethod(), $this->base_uri . $rq->getUri()->getPath(), [
             'headers' => $rq->getHeaders(),
-            'body' => $rq->getParsedBody()
+            'json' => $rq->getParsedBody()
         ]);
     }
 }

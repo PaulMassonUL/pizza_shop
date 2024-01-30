@@ -37,10 +37,8 @@ class Jwt
             $client->request('GET', '/api/users/validate', [
                 'headers' => $headers
             ]);
-            var_dump('Valid');
             return $next->handle($request);
         } catch (RequestException $e) {
-            var_dump('Invalid' . $e->getMessage());
             $response = $e->getResponse();
             $response_json = json_decode($response->getBody()->getContents(), true);
 

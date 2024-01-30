@@ -12,9 +12,10 @@ class GatewayService implements iGateway
     {
         $client = new Client([
             'timeout' => 30.0,
+            'http_errors' => false, // Important pour ne pas lancer d'exceptions en cas d'erreurs 4xx ou 5xx
         ]);
 
-        $options['headers']['Content-Type'] = 'application/json';
+        $options['headers']['Content-Type'] = 'application/json;charset=utf-8';
         return $client->request($method, $uri, $options);
     }
 
