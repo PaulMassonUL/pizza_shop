@@ -38,3 +38,8 @@
 ##### RabbitMQ
 **/mnesia/
 **/.erlang.cookie
+
+
+##### Node.js
+**/node_modules/
+package-lock.json

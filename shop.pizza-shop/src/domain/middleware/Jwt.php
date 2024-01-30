@@ -25,7 +25,7 @@ class Jwt
 
         $client = new Client([
             'base_uri' => $this->auth_uri,
-            'timeout' => 30.0
+            'timeout' => 60.0
         ]);
 
         $headers = [

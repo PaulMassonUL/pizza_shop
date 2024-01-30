@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use pizzashop\gateway\app\actions\CommandeAction;
+use pizzashop\gateway\app\actions\ProduitAction;
 use pizzashop\gateway\app\actions\UserAction;
 
 return function (\Slim\App $app): void {
@@ -21,13 +22,13 @@ return function (\Slim\App $app): void {
         });
 
         $app->group('produits', function ($app) {
-            $app->get('/{id}[/]', GetProduitAction::class);
-            $app->get('/categories/{id_categorie}[/]', GetProduitsAction::class);
+            $app->get('[/]', ProduitAction::class);
+            $app->get('/{id}[/]', ProduitAction::class);
+            $app->get('/categories/{id_categorie}[/]', ProduitAction::class);
         });
 
-        $app->group('catalogue', function ($app) {
-            $app->get('/{id}[/]', GetCategorieAction::class);
-            $app->get('/categories/{id_categorie}[/]', GetCategoriesAction::class);
+        $app->group('categories', function ($app) {
+            $app->get('/{id}/produits[/]', ProduitAction::class);
         });
     });
 

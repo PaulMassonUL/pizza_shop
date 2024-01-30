@@ -11,7 +11,7 @@ class GatewayService implements iGateway
     public function request(string $method, string $uri = '', array $options = []): ResponseInterface
     {
         $client = new Client([
-            'timeout' => 30.0,
+            'timeout' => 60.0,
             'http_errors' => false, // Important pour ne pas lancer d'exceptions en cas d'erreurs 4xx ou 5xx
         ]);
 

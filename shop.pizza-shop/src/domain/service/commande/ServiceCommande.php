@@ -87,7 +87,7 @@ class ServiceCommande implements iCommander
 
         $client = new Client([
             'base_uri' => $this->catalog_uri,
-            'timeout' => 30.0
+            'timeout' => 60.0
         ]);
 
         $headers = [
